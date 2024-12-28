@@ -115,3 +115,29 @@ def patch_item(item_id: int, item: PatchItemSchema, db: Session = Depends(get_db
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="Oops! Something went wrong")
+
+
+@router.delete("/{item_id}")
+def delete_item(item_id: int, db: Session = Depends(get_db)):
+    """
+    Delete an item by its ID.
+
+    Args:
+        item_id (int): The ID of the item to delete.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing the message that the item was deleted successfully.
+    Raises:
+        HTTPException: If the item is not found or an error occurs.
+    """
+    try:
+        db_item = db.query(Item).filter(Item.id == item_id).first()
+        if not db_item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        db.delete(db_item)
+        db.commit()
+        return {"message": "Item deleted successfully"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail="Oops! Something went wrong")
