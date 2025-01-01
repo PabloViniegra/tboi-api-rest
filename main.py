@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from src.database.db import Base, engine
 from src.routers import item
+from src.routers import chatbot
 import src.database.models
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,3 +18,4 @@ app.add_middleware(
 )
 
 app.include_router(item.router)
+app.include_router(chatbot.router)

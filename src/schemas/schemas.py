@@ -37,3 +37,12 @@ class PatchItemSchema(BaseModel):
     item_pool: Optional[list[str]] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class Message(BaseModel):
+    role: str
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: List[Message]
