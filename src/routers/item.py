@@ -3,7 +3,7 @@ from src.schemas.schemas import ResponseItemSchema, ItemSchema, PatchItemSchema
 from src.database.models.item import Item
 from sqlalchemy.orm import Session
 from src.database.db import get_db
-from sqlalchemy import or_
+from sqlalchemy import or_, asc, desc, nulls_last
 from math import ceil
 from fastapi import Query
 
@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=ResponseItemSchema)
-def get_items(page: int = Query(1, ge=1), limit: int = Query(10, ge=1), q: str = None, db: Session = Depends(get_db)):
+def get_items(page: int = Query(1, ge=1), limit: int = Query(10, ge=1), q: str = None, sort: str = None, db: Session = Depends(get_db)):
     """
     Retrieve a list of items with pagination based on pages and optional search query.
 
@@ -22,6 +22,7 @@ def get_items(page: int = Query(1, ge=1), limit: int = Query(10, ge=1), q: str =
         page (int, optional): The page number to retrieve. Defaults to 1.
         limit (int, optional): The number of items per page. Defaults to 10.
         q (str, optional): The search query to filter items. Defaults to None.
+        sort (str, optional): The sort order of items. Defaults to None.
         db (Session): The database session.
 
     Returns:
@@ -38,6 +39,16 @@ def get_items(page: int = Query(1, ge=1), limit: int = Query(10, ge=1), q: str =
                     Item.description.ilike(f"%{q}%")
                 )
             )
+
+        if sort:
+            if sort == 'alphabetical-asc':
+                query = query.order_by(asc(Item.title))
+            elif sort == 'alphabetical-desc':
+                query = query.order_by(desc(Item.title))
+            elif sort == 'quality-asc':
+                query = query.order_by(nulls_last(asc(Item.quality)))
+            elif sort == 'quality-desc':
+                query = query.order_by(nulls_last(desc(Item.quality)))
 
         total_items = query.count()
         skip = (page - 1) * limit
