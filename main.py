@@ -1,9 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from src.database.db import Base, engine
 from src.routers import item
 from src.routers import chatbot
 import src.database.models
 from fastapi.middleware.cors import CORSMiddleware
+from auth import get_user
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -17,5 +18,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(item.router)
-app.include_router(chatbot.router)
+app.include_router(item.router, dependencies=[Depends(get_user)])
+app.include_router(chatbot.router, dependencies=[Depends(get_user)])
