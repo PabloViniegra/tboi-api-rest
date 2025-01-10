@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.database.db import get_db
 from src.database.models.monster import Monster
-from src.schemas.schemas import ResponseMonsterSchema, MonsterSchema, PlainMonsterSchema
+from src.schemas.schemas import ResponseMonsterSchema, MonsterSchema, PlainMonsterSchema, UpdateMonsterSchema
 from sqlalchemy import or_
 from fastapi import Query
 from math import ceil
@@ -14,14 +14,15 @@ router = APIRouter(
 
 
 @router.get('/', response_model=ResponseMonsterSchema)
-def get_monsters(page: int = Query(1, ge=1), limit: int = Query(10, ge=1), q: str = None, db: Session = Depends(get_db)):
+def get_monsters(page: int = Query(1, ge=1), limit: int = Query(10, ge=1), q: str = None, sort: str = None, db: Session = Depends(get_db)):
     """
-    Retrieve a list of monsters with pagination based on pages and optional search query.
+    Retrieve a list of monsters with pagination based on pages and optional search query and sort query.
 
     Args:
         page (int, optional): The page number to retrieve. Defaults to 1.
         limit (int, optional): The number of monsters per page. Defaults to 10.
         q (str, optional): The search query to filter monsters. Defaults to None.
+        sort (str, optional): The sorting order of the monsters. Defaults to None.
         db (Session): The database session.
 
     Returns:
@@ -37,6 +38,15 @@ def get_monsters(page: int = Query(1, ge=1), limit: int = Query(10, ge=1), q: st
                     Monster.description.ilike(f"%{q}%")
                 )
             )
+
+        if sort:
+            if sort == 'asc':
+                query = query.order_by(Monster.name.asc())
+            elif sort == 'desc':
+                query = query.order_by(Monster.name.desc())
+            else:
+                raise HTTPException(
+                    status_code=400, detail="Invalid sort parameter. Use 'asc' or 'desc'")
 
         total_monsters = query.count()
         skip = (page - 1) * limit
@@ -86,7 +96,7 @@ def get_monster(monster_id: int, db: Session = Depends(get_db)):
             status_code=500, detail="Oops! Something went wrong")
 
 
-@router.post('/', response_model=MonsterSchema)
+@router.post('/', response_model=MonsterSchema, status_code=status.HTTP_201_CREATED)
 def create_monster(monster: PlainMonsterSchema, db: Session = Depends(get_db)):
     """
     Create a new monster based on the provided monster details.
@@ -103,7 +113,7 @@ def create_monster(monster: PlainMonsterSchema, db: Session = Depends(get_db)):
         new_monster = Monster(
             name=monster.name,
             description=monster.description,
-            image=monster.image
+            icon=monster.icon
         )
 
         db.add(new_monster)
@@ -117,8 +127,8 @@ def create_monster(monster: PlainMonsterSchema, db: Session = Depends(get_db)):
             status_code=500, detail="Oops! Something went wrong")
 
 
-@router.patch('/{monster_id}', response_model=MonsterSchema)
-def update_monster(monster_id: int, monster: PlainMonsterSchema, db: Session = Depends(get_db)):
+@router.patch('/{monster_id}', response_model=MonsterSchema, status_code=status.HTTP_201_CREATED)
+def update_monster(monster_id: int, monster: UpdateMonsterSchema, db: Session = Depends(get_db)):
     """
     Update an existing monster based on the provided monster details.
 

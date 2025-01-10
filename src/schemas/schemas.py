@@ -51,6 +51,14 @@ class MonsterSchema(PlainMonsterSchema):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UpdateMonsterSchema(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ResponseMonsterSchema(BaseModel):
     count: int
     pages: int
