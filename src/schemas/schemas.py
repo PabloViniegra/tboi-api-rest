@@ -39,6 +39,27 @@ class PatchItemSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PlainMonsterSchema(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+
+
+class MonsterSchema(PlainMonsterSchema):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ResponseMonsterSchema(BaseModel):
+    count: int
+    pages: int
+    page: int
+    monsters: List[MonsterSchema]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class Message(BaseModel):
     role: str
     content: str

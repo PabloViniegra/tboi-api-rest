@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends
 from src.database.db import Base, engine
 from src.routers import item
 from src.routers import chatbot
+from src.routers import monster
 import src.database.models
 from fastapi.middleware.cors import CORSMiddleware
 from auth import get_user
@@ -20,3 +21,4 @@ app.add_middleware(
 
 app.include_router(item.router, dependencies=[Depends(get_user)])
 app.include_router(chatbot.router, dependencies=[Depends(get_user)])
+app.include_router(monster.router, dependencies=[Depends(get_user)])

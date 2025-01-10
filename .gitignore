@@ -1,2 +1,17 @@
+# Environments
 .env
 .venv
+
+# Alembic migrations cache
+migrations/__pycache__/
+migrations/versions/__pycache__/
+alembic.ini
+
+# Python egg files
+*.egg-info/
+.eggs/
+
+# Temporary files
+*.bak
+*.swp
+*.tmp
